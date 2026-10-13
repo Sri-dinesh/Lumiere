@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: lumiere-api
+    env: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci && npm run build -w apps/api
+    startCommand: npm run start -w apps/api
+    healthCheckPath: /health
+    autoDeploy: false
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CINEMA_TIMEZONE
+        value: Asia/Kolkata
+      - key: SESSION_TTL_SECONDS
+        value: 604800
+      - key: HOLD_TTL_SECONDS
+        value: 300
+      - key: DATABASE_URL
+        sync: false
+      - key: PUBLIC_WEB_ORIGIN
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
