@@ -278,7 +278,7 @@ export function SeatSelectionPage() {
               to={`/checkout/${activeHold.holdId}`}
               className="w-full sm:w-auto px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 text-sm font-extrabold text-center transition shadow-lg shadow-amber-500/20 active:scale-[0.98]"
             >
-              Proceed to Mock Payment &rarr;
+              Pay (Continue to Checkout) &rarr;
             </Link>
           ) : (
             <button
@@ -295,7 +295,7 @@ export function SeatSelectionPage() {
                 ? 'Reserving Seats...'
                 : !isAuthenticated
                   ? 'Sign In to Reserve Seats'
-                  : 'Hold Seats & Proceed (5 min)'}
+                  : 'Continue (Hold 5 min)'}
             </button>
           )}
         </div>

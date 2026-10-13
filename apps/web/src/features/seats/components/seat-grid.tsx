@@ -44,8 +44,8 @@ export const SeatGrid: React.FC<SeatGridProps> = ({
         <div className="relative h-12 w-full overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-16 rounded-[50%] border-t-4 border-amber-400/80 shadow-[0_-8px_25px_rgba(251,191,36,0.25)]" />
         </div>
-        <div className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">
-          Curved 4K Laser Screen
+        <div className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] text-neutral-400 flex items-center gap-2">
+          <span>▲</span> Screen this way • 4K Laser Projection <span>▲</span>
         </div>
       </div>
 

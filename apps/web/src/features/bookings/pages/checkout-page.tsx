@@ -252,7 +252,7 @@ export function CheckoutPage() {
                   'Processing Simulation...'
                 ) : (
                   <>
-                    <span>💳</span> Confirm Mock Payment
+                    <span>💳</span> Payment success
                   </>
                 )}
               </button>
@@ -263,7 +263,7 @@ export function CheckoutPage() {
                 disabled={paymentMutation.isPending || releaseMutation.isPending}
                 className="w-full py-3.5 px-4 rounded-xl border border-neutral-700 hover:border-neutral-600 bg-neutral-800/80 hover:bg-neutral-800 text-neutral-200 font-bold text-sm transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                <span>✕</span> Simulate Bank Decline
+                <span>✕</span> Payment failure
               </button>
             </div>
 
