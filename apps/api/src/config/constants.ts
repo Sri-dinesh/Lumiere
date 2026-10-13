@@ -1,0 +1,10 @@
+export const CINEMA_SCREEN_ID = 1;
+export const CINEMA_SEAT_ROWS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] as const;
+export const CINEMA_SEATS_PER_ROW = 10;
+export const TOTAL_SCREEN_SEATS = 80;
+export const HOLD_DURATION_SECONDS = 300; // 5 minutes
+export const MAX_SEATS_PER_HOLD = 6;
+export const MIN_SEATS_PER_HOLD = 1;
+export const DEFAULT_TIMEZONE = 'Asia/Kolkata';
+export const CANCELLATION_CUTOFF_HOURS = 2; // Bonus cancellation cutoff
+export const SESSION_COOKIE_NAME = 'sid';
