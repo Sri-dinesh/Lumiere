@@ -46,12 +46,12 @@ describe('Movies & Shows Catalog & Admin Scheduling (Phase P4)', () => {
   });
 
   it('CAT-02: GET /api/v1/movies?search=... filters movies case-insensitively', async () => {
-    // We have seeded movies like 'Midnight Orbit', 'Echoes of Banaras', etc.
-    const res = await request(app).get('/api/v1/movies?search=orbit');
+    // We have seeded authentic blockbuster movies like 'Dune: Part Two', 'Oppenheimer', etc.
+    const res = await request(app).get('/api/v1/movies?search=dune');
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data.length).toBeGreaterThanOrEqual(1);
-    expect(res.body.data[0].title.toLowerCase()).toContain('orbit');
+    expect(res.body.data[0].title.toLowerCase()).toContain('dune');
   });
 
   it('CAT-03: customer cannot create movie on admin route (403 FORBIDDEN)', async () => {
@@ -107,10 +107,10 @@ describe('Movies & Shows Catalog & Admin Scheduling (Phase P4)', () => {
   });
 
   it('CAT-06: admin can schedule a show and it initializes exactly 80 seats', async () => {
-    // Schedule a show 3 days in the future at 14:00 IST
+    // Schedule a show 7 days in the future at 14:00 IST to avoid seed schedule collision
     const futureDate = DateTime.now()
       .setZone('Asia/Kolkata')
-      .plus({ days: 3 })
+      .plus({ days: 7 })
       .toFormat('yyyy-MM-dd');
     const localTime = '14:00';
 
