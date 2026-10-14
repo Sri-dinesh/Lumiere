@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Ticket, Clock, Film, Sparkles } from 'lucide-react';
 import type { Movie, MovieRating } from '../movie.types.js';
 
 interface MovieCardProps {
@@ -13,76 +15,114 @@ function formatDuration(minutes: number): string {
   return `${h}h ${m}m`;
 }
 
-function getRatingBadgeColor(rating: MovieRating): string {
+function getRatingBadgeStyle(rating: MovieRating): { badge: string; text: string } {
   switch (rating) {
     case 'U':
-      return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+      return {
+        badge: 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40 shadow-emerald-500/10',
+        text: 'Universal (All Ages)',
+      };
     case 'UA':
-      return 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+      return {
+        badge: 'bg-amber-950/80 text-amber-300 border-amber-500/40 shadow-amber-500/10',
+        text: 'Parental Guidance (12+)',
+      };
     case 'A':
-      return 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+      return {
+        badge: 'bg-rose-950/80 text-rose-300 border-rose-500/40 shadow-rose-500/10',
+        text: 'Adults Only (18+)',
+      };
     default:
-      return 'bg-neutral-800 text-neutral-300 border-neutral-700';
+      return {
+        badge: 'bg-neutral-900/80 text-neutral-300 border-neutral-700',
+        text: 'Standard',
+      };
   }
 }
 
 export function MovieCard({ movie }: MovieCardProps) {
+  const [imageError, setImageError] = useState(false);
+  const ratingStyle = getRatingBadgeStyle(movie.rating);
+
   return (
-    <div className="group relative flex flex-col rounded-2xl bg-neutral-900/60 border border-neutral-800/80 overflow-hidden hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300">
-      {/* Poster image container */}
-      <div className="relative aspect-[2/3] w-full overflow-hidden bg-neutral-950">
-        {movie.posterUrl ? (
+    <div className="group relative flex flex-col rounded-2xl bg-neutral-900/70 border border-neutral-800/80 overflow-hidden hover:border-amber-500/50 hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-300 backdrop-blur-sm">
+      {/* Poster image container with 2:3 aspect ratio */}
+      <div className="relative aspect-[2/3] w-full overflow-hidden bg-gradient-to-b from-neutral-900 to-neutral-950">
+        {!imageError && movie.posterUrl ? (
           <img
             src={movie.posterUrl}
-            alt={movie.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            alt={`${movie.title} poster`}
+            onError={() => setImageError(true)}
+            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             loading="lazy"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-neutral-900 to-neutral-950 text-neutral-700">
-            <span className="text-4xl">🎬</span>
+          <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-neutral-900 via-neutral-950 to-neutral-900 border-b border-neutral-800/60">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-3 group-hover:scale-110 transition-transform">
+              <Film className="h-8 w-8" />
+            </div>
+            <span className="text-sm font-bold text-white tracking-tight line-clamp-2">
+              {movie.title}
+            </span>
+            <span className="mt-1 text-xs text-amber-400/80 font-medium">Lumiere Cinema</span>
           </div>
         )}
 
-        {/* Rating badge */}
-        <div className="absolute top-3 right-3">
+        {/* Ambient Top Vignette */}
+        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-neutral-950/80 via-neutral-950/30 to-transparent pointer-events-none" />
+
+        {/* Top Badges */}
+        <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-neutral-950/80 text-amber-300/90 border border-amber-500/30 backdrop-blur-md shadow-sm">
+            <Sparkles className="h-3 w-3 text-amber-400" />
+            4K Laser
+          </span>
           <span
-            className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold border backdrop-blur-md ${getRatingBadgeColor(
-              movie.rating,
-            )}`}
+            title={ratingStyle.text}
+            className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold border backdrop-blur-md shadow-sm ${ratingStyle.badge}`}
           >
             {movie.rating}
           </span>
         </div>
 
-        {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/20 to-transparent opacity-80" />
+        {/* Bottom Fade Gradient for text contrast */}
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-neutral-950 via-neutral-950/70 to-transparent pointer-events-none" />
       </div>
 
-      {/* Content */}
+      {/* Content block */}
       <div className="flex flex-1 flex-col p-4">
+        {/* Title */}
         <h3 className="text-base font-bold text-white tracking-tight line-clamp-1 group-hover:text-amber-400 transition-colors">
           {movie.title}
         </h3>
 
-        <div className="mt-1 flex items-center gap-2 text-xs text-neutral-400 font-medium">
-          <span>{movie.language}</span>
+        {/* Meta badges */}
+        <div className="mt-1.5 flex items-center gap-2 text-xs text-neutral-400 font-medium">
+          <span className="px-1.5 py-0.5 rounded bg-neutral-800/80 text-neutral-300 text-[11px] font-semibold">
+            {movie.language}
+          </span>
           <span>•</span>
-          <span>{formatDuration(movie.durationMinutes)}</span>
+          <span className="flex items-center gap-1 text-[11px]">
+            <Clock className="h-3 w-3 text-neutral-500" />
+            {formatDuration(movie.durationMinutes)}
+          </span>
         </div>
 
+        {/* Description snippet */}
         {movie.description && (
           <p className="mt-2 text-xs text-neutral-400 line-clamp-2 leading-relaxed">
             {movie.description}
           </p>
         )}
 
+        {/* Interactive action */}
         <div className="mt-auto pt-4">
           <Link
             to={`/movies/${movie.id}`}
-            className="flex w-full items-center justify-center rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-neutral-950 hover:bg-amber-400 active:scale-[0.98] transition-all shadow-md shadow-amber-500/10"
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 px-4 py-2.5 text-xs font-bold text-neutral-950 hover:from-amber-400 hover:to-amber-300 active:scale-[0.98] transition-all shadow-md shadow-amber-500/15"
           >
-            Book Tickets
+            <Ticket className="h-3.5 w-3.5" />
+            <span>Book Tickets</span>
           </Link>
         </div>
       </div>
