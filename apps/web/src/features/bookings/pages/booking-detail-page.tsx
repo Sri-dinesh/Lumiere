@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, Printer, CheckCircle2, XCircle, Ticket, X } from 'lucide-react';
 import { getBookingById, cancelBooking } from '../booking.api.js';
 import { TicketPass } from '../components/ticket-pass.js';
 import { ApiError } from '../../../lib/api-client.js';
@@ -54,7 +55,9 @@ export function BookingDetailPage() {
   if (error || !booking) {
     return (
       <div className="max-w-lg mx-auto py-16 text-center space-y-4">
-        <div className="text-4xl">🎟️</div>
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mx-auto">
+          <Ticket className="h-6 w-6" />
+        </div>
         <h2 className="text-xl font-bold text-white">Ticket Not Found</h2>
         <p className="text-sm text-neutral-400">
           The requested booking ticket could not be found or you do not have permission to view it.
@@ -75,17 +78,19 @@ export function BookingDetailPage() {
       <div className="flex items-center justify-between">
         <Link
           to="/bookings"
-          className="text-xs text-neutral-400 hover:text-white transition flex items-center gap-1.5"
+          className="text-xs text-neutral-400 hover:text-white transition flex items-center gap-1.5 group"
         >
-          &larr; Back to My Bookings
+          <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+          <span>Back to My Bookings</span>
         </Link>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => window.print()}
-            className="px-3 py-1.5 rounded-lg border border-neutral-700 bg-neutral-800/80 hover:bg-neutral-800 text-xs font-semibold text-neutral-200 transition flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-lg border border-neutral-700 bg-neutral-800/80 hover:bg-neutral-800 text-xs font-semibold text-neutral-200 transition flex items-center gap-1.5 cursor-pointer"
           >
-            <span>🖨️</span> Print Pass
+            <Printer className="h-3.5 w-3.5" />
+            <span>Print Pass</span>
           </button>
         </div>
       </div>
@@ -94,14 +99,15 @@ export function BookingDetailPage() {
       {booking.status === 'CONFIRMED' ? (
         <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-4 text-center">
           <span className="text-emerald-400 text-sm font-bold flex items-center justify-center gap-2">
-            <span>🎉</span> Booking Confirmed! Present this digital ticket at Auditorium 1 entrance.
+            <CheckCircle2 className="h-4 w-4" />
+            <span>Booking Confirmed! Present this digital ticket at Auditorium 1 entrance.</span>
           </span>
         </div>
       ) : (
         <div className="rounded-2xl border border-rose-500/30 bg-rose-950/20 p-4 text-center">
           <span className="text-rose-400 text-sm font-bold flex items-center justify-center gap-2">
-            <span>✕</span> This booking has been cancelled and refunded. Seats released to
-            inventory.
+            <XCircle className="h-4 w-4" />
+            <span>This booking has been cancelled and refunded. Seats released to inventory.</span>
           </span>
         </div>
       )}
@@ -133,8 +139,8 @@ export function BookingDetailPage() {
       {showCancelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
           <div className="w-full max-w-md rounded-3xl border border-neutral-800 bg-neutral-900 p-6 sm:p-8 space-y-5 shadow-2xl">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-2xl text-rose-400">
-              ✕
+            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+              <X className="h-6 w-6" />
             </div>
 
             <div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Film, Check, Copy } from 'lucide-react';
 import type { BookingDetail, BookingSummary } from '../booking.types.js';
 import { formatPaiseToInr, formatIstDate, formatIstTime } from '../../../lib/formatters.js';
 
@@ -34,7 +35,8 @@ export function TicketPass({ booking, onCancel, isCancelling }: TicketPassProps)
             <div>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[11px] font-black uppercase tracking-widest text-amber-400 flex items-center gap-1.5">
-                  <span>🎬</span> LUMIERE CINEMAS
+                  <Film className="h-3.5 w-3.5 text-amber-400" />
+                  <span>LUMIÈRE CINEMA</span>
                 </span>
                 <span
                   className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
@@ -209,7 +211,13 @@ export function TicketPass({ booking, onCancel, isCancelling }: TicketPassProps)
                 className="w-full mt-1 px-2 py-1 rounded bg-neutral-900 border border-neutral-800 text-[11px] font-mono text-neutral-300 hover:text-white hover:border-neutral-700 transition flex items-center justify-center gap-1.5"
               >
                 <span className="truncate">{booking.id.slice(0, 8)}...</span>
-                <span>{copied ? '✓' : '📋'}</span>
+                <span>
+                  {copied ? (
+                    <Check className="h-3 w-3 text-emerald-400" />
+                  ) : (
+                    <Copy className="h-3 w-3 text-neutral-400" />
+                  )}
+                </span>
               </button>
             </div>
           </div>

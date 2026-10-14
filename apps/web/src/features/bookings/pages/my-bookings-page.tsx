@@ -1,6 +1,17 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  Ticket,
+  Calendar,
+  Clock,
+  Tv,
+  Armchair,
+  AlertTriangle,
+  X,
+  ChevronRight,
+  Film,
+} from 'lucide-react';
 import { listMyBookings, cancelBooking } from '../booking.api.js';
 import { formatPaiseToInr, formatIstDate, formatIstTime } from '../../../lib/formatters.js';
 import { ApiError } from '../../../lib/api-client.js';
@@ -69,7 +80,9 @@ export function MyBookingsPage() {
   if (error) {
     return (
       <div className="max-w-lg mx-auto py-16 text-center space-y-4">
-        <div className="text-4xl">⚠️</div>
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mx-auto">
+          <AlertTriangle className="h-6 w-6" />
+        </div>
         <h2 className="text-xl font-bold text-white">Failed to Load Bookings</h2>
         <p className="text-sm text-neutral-400">
           There was an error retrieving your bookings. Please try refreshing.
@@ -83,7 +96,10 @@ export function MyBookingsPage() {
       {/* Page Title */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
-          <span>🎟️</span> My Movie Bookings
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+            <Ticket className="h-4 w-4" />
+          </div>
+          <span>My Movie Bookings</span>
         </h1>
         <p className="text-sm text-neutral-400 mt-1">
           Review your upcoming cinema screenings and booking transaction history.
@@ -98,7 +114,7 @@ export function MyBookingsPage() {
             onClick={() => setActionError(null)}
             className="text-rose-400 hover:text-white"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
@@ -108,7 +124,7 @@ export function MyBookingsPage() {
         <button
           type="button"
           onClick={() => setActiveTab('upcoming')}
-          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 cursor-pointer ${
             activeTab === 'upcoming'
               ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20'
               : 'text-neutral-400 hover:text-white hover:bg-neutral-900'
@@ -129,7 +145,7 @@ export function MyBookingsPage() {
         <button
           type="button"
           onClick={() => setActiveTab('past')}
-          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 cursor-pointer ${
             activeTab === 'past'
               ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20'
               : 'text-neutral-400 hover:text-white hover:bg-neutral-900'
@@ -151,7 +167,9 @@ export function MyBookingsPage() {
       {/* Bookings List */}
       {displayedBookings.length === 0 ? (
         <div className="rounded-3xl border border-neutral-800/80 bg-neutral-900/30 p-12 text-center space-y-4">
-          <div className="text-4xl">🍿</div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mx-auto">
+            <Film className="h-6 w-6" />
+          </div>
           <h3 className="text-lg font-bold text-white">
             {activeTab === 'upcoming' ? 'No Upcoming Screenings' : 'No Past Bookings'}
           </h3>
@@ -174,7 +192,7 @@ export function MyBookingsPage() {
           {displayedBookings.map((b) => (
             <div
               key={b.id}
-              className="rounded-3xl border border-neutral-800 bg-neutral-900/60 p-6 backdrop-blur flex flex-col justify-between space-y-4 hover:border-neutral-700 transition"
+              className="rounded-3xl border border-neutral-800 bg-neutral-900/60 p-6 backdrop-blur flex flex-col justify-between space-y-4 hover:border-neutral-700 transition shadow-lg"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
@@ -196,18 +214,20 @@ export function MyBookingsPage() {
 
                 <div className="mt-3 space-y-1.5 text-xs text-neutral-300">
                   <div className="flex items-center gap-2">
-                    <span className="text-neutral-500">📅</span>
+                    <Calendar className="h-3.5 w-3.5 text-neutral-500" />
                     <span className="font-semibold text-white">{formatIstDate(b.startsAt)}</span>
+                    <span className="text-neutral-600">•</span>
+                    <Clock className="h-3.5 w-3.5 text-neutral-500" />
                     <span className="text-amber-400 font-bold">
-                      ({formatIstTime(b.startsAt)} IST)
+                      {formatIstTime(b.startsAt)} IST
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-neutral-500">📽️</span>
+                    <Tv className="h-3.5 w-3.5 text-neutral-500" />
                     <span>Auditorium 1</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-neutral-500">💺</span>
+                    <Armchair className="h-3.5 w-3.5 text-neutral-500" />
                     <div className="flex flex-wrap gap-1">
                       {b.seatCodes.map((s) => (
                         <span
@@ -236,7 +256,7 @@ export function MyBookingsPage() {
                       type="button"
                       onClick={() => setCancellingBookingId(b.id)}
                       disabled={cancelMutation.isPending && cancellingBookingId === b.id}
-                      className="px-3 py-1.5 rounded-lg border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs font-semibold transition"
+                      className="px-3 py-1.5 rounded-lg border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs font-semibold transition cursor-pointer"
                     >
                       {cancelMutation.isPending && cancellingBookingId === b.id
                         ? 'Cancelling...'
@@ -246,9 +266,10 @@ export function MyBookingsPage() {
 
                   <Link
                     to={`/bookings/${b.id}`}
-                    className="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-bold transition shadow-sm"
+                    className="inline-flex items-center gap-1 px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-bold transition shadow-sm"
                   >
-                    View Ticket &rarr;
+                    <span>View Ticket</span>
+                    <ChevronRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
               </div>
@@ -261,8 +282,8 @@ export function MyBookingsPage() {
       {cancellingBookingId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
           <div className="w-full max-w-md rounded-3xl border border-neutral-800 bg-neutral-900 p-6 sm:p-8 space-y-5 shadow-2xl">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-2xl text-rose-400">
-              ✕
+            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+              <X className="h-6 w-6" />
             </div>
 
             <div>
@@ -278,7 +299,7 @@ export function MyBookingsPage() {
                 type="button"
                 onClick={() => setCancellingBookingId(null)}
                 disabled={cancelMutation.isPending}
-                className="px-4 py-2.5 rounded-xl border border-neutral-700 hover:bg-neutral-800 text-xs font-semibold text-neutral-300 transition"
+                className="px-4 py-2.5 rounded-xl border border-neutral-700 hover:bg-neutral-800 text-xs font-semibold text-neutral-300 transition cursor-pointer"
               >
                 Keep Booking
               </button>
@@ -286,7 +307,7 @@ export function MyBookingsPage() {
                 type="button"
                 onClick={() => cancelMutation.mutate(cancellingBookingId)}
                 disabled={cancelMutation.isPending}
-                className="px-5 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-400 text-white text-xs font-bold transition shadow-lg shadow-rose-500/20 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-400 text-white text-xs font-bold transition shadow-lg shadow-rose-500/20 disabled:opacity-50 cursor-pointer"
               >
                 {cancelMutation.isPending ? 'Cancelling...' : 'Confirm Cancellation'}
               </button>
