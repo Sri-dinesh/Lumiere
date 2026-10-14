@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { Film, AlertTriangle } from 'lucide-react';
 import { apiClient } from '../../lib/api-client.js';
-import type { User } from './use-current-user.js';
+import type { User as UserType } from './use-current-user.js';
 
 interface LoginResponse {
-  user: User;
+  user: UserType;
 }
 
 export function LoginPage() {
@@ -51,20 +52,20 @@ export function LoginPage() {
 
   return (
     <div className="max-w-md mx-auto py-12 px-4 sm:px-6">
-      <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-8 shadow-2xl backdrop-blur-sm">
+      <div className="bg-neutral-900/80 border border-neutral-800 rounded-3xl p-8 shadow-2xl backdrop-blur-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-2xl mb-3">
-            🎬
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-neutral-950 shadow-md shadow-amber-500/20 mb-3">
+            <Film className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Sign In to Lumiere</h1>
-          <p className="text-sm text-neutral-400 mt-1">
+          <h1 className="text-2xl font-black tracking-tight text-white">Sign In to Lumière</h1>
+          <p className="text-xs text-neutral-400 mt-1">
             Access your bookings and reserve movie tickets seamlessly.
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 p-3.5 rounded-lg bg-red-950/60 border border-red-800/80 text-red-200 text-sm flex items-start gap-2.5">
-            <span className="text-red-400 font-bold">⚠️</span>
+          <div className="mb-6 p-3.5 rounded-xl bg-rose-950/60 border border-rose-800/80 text-rose-200 text-xs flex items-start gap-2.5">
+            <AlertTriangle className="h-4 w-4 text-rose-400 flex-shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}

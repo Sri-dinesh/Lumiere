@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { Plus, Clock, X } from 'lucide-react';
 import { fetchAdminShows, createShow, deleteShow, fetchShowReport } from '../../shows/show.api.js';
 import { fetchMovies } from '../../movies/movie.api.js';
 import type { AdminShow, CreateShowPayload, ShowReport } from '../../shows/show.types.js';
@@ -173,9 +174,10 @@ export function AdminShowsPage() {
         <button
           type="button"
           onClick={openScheduleModal}
-          className="rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-neutral-950 hover:bg-amber-400 transition shadow-md shadow-amber-500/10 flex items-center gap-1.5"
+          className="rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 px-4 py-2.5 text-xs font-bold text-neutral-950 hover:from-amber-400 hover:to-amber-300 transition shadow-md shadow-amber-500/10 flex items-center gap-1.5 cursor-pointer active:scale-95"
         >
-          <span>➕</span> Schedule Show
+          <Plus className="h-4 w-4" />
+          <span>Schedule Show</span>
         </button>
       </div>
 
@@ -185,9 +187,9 @@ export function AdminShowsPage() {
           <button
             type="button"
             onClick={() => setDeleteError(null)}
-            className="text-neutral-400 hover:text-white font-bold"
+            className="text-neutral-400 hover:text-white font-bold cursor-pointer"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
@@ -246,7 +248,9 @@ export function AdminShowsPage() {
           </div>
         ) : shows.length === 0 ? (
           <div className="p-12 text-center space-y-2">
-            <div className="text-3xl">🕒</div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mx-auto">
+              <Clock className="h-6 w-6" />
+            </div>
             <p className="text-sm font-semibold text-white">No scheduled shows found</p>
             <p className="text-xs text-neutral-400">
               Click &quot;Schedule Show&quot; above to add a screening slot.
@@ -328,9 +332,9 @@ export function AdminShowsPage() {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-neutral-500 hover:text-white"
+                className="text-neutral-500 hover:text-white cursor-pointer"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 
@@ -451,9 +455,9 @@ export function AdminShowsPage() {
               <button
                 type="button"
                 onClick={() => setSelectedReportShowId(null)}
-                className="w-8 h-8 rounded-full border border-neutral-800 hover:bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white transition"
+                className="w-8 h-8 rounded-full border border-neutral-800 hover:bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white transition cursor-pointer"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 

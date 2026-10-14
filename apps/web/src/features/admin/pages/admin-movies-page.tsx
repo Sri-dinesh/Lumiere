@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { Plus, Film, X } from 'lucide-react';
 import { fetchMovies, createMovie, updateMovie, deleteMovie } from '../../movies/movie.api.js';
 import type { Movie, MovieRating, CreateMoviePayload } from '../../movies/movie.types.js';
 import { ApiError } from '../../../lib/api-client.js';
@@ -143,9 +144,10 @@ export function AdminMoviesPage() {
         <button
           type="button"
           onClick={openCreateModal}
-          className="rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-neutral-950 hover:bg-amber-400 transition shadow-md shadow-amber-500/10 flex items-center gap-1.5"
+          className="rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 px-4 py-2.5 text-xs font-bold text-neutral-950 hover:from-amber-400 hover:to-amber-300 transition shadow-md shadow-amber-500/10 flex items-center gap-1.5 cursor-pointer active:scale-95"
         >
-          <span>➕</span> Add New Movie
+          <Plus className="h-4 w-4" />
+          <span>Add New Movie</span>
         </button>
       </div>
 
@@ -155,9 +157,9 @@ export function AdminMoviesPage() {
           <button
             type="button"
             onClick={() => setDeleteError(null)}
-            className="text-neutral-400 hover:text-white font-bold"
+            className="text-neutral-400 hover:text-white font-bold cursor-pointer"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
@@ -172,7 +174,9 @@ export function AdminMoviesPage() {
           <div className="p-12 text-center text-xs text-rose-400">Failed to load movies.</div>
         ) : movies.length === 0 ? (
           <div className="p-12 text-center space-y-2">
-            <div className="text-3xl">🎞️</div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mx-auto">
+              <Film className="h-6 w-6" />
+            </div>
             <p className="text-sm font-semibold text-white">No movies found</p>
             <p className="text-xs text-neutral-400">
               Click &quot;Add New Movie&quot; to add your first title.
@@ -203,8 +207,8 @@ export function AdminMoviesPage() {
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-xs">
-                            🎬
+                          <div className="flex h-full w-full items-center justify-center text-xs text-amber-400">
+                            <Film className="h-4 w-4" />
                           </div>
                         )}
                       </div>
@@ -229,7 +233,7 @@ export function AdminMoviesPage() {
                         <button
                           type="button"
                           onClick={() => openEditModal(m)}
-                          className="px-2.5 py-1 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-neutral-300 font-medium transition"
+                          className="px-2.5 py-1 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-neutral-300 font-medium transition cursor-pointer"
                         >
                           Edit
                         </button>
@@ -237,7 +241,7 @@ export function AdminMoviesPage() {
                           type="button"
                           onClick={() => handleDelete(m)}
                           disabled={deleteMutation.isPending}
-                          className="px-2.5 py-1 rounded-lg border border-rose-500/30 hover:bg-rose-500/20 text-rose-300 font-medium transition"
+                          className="px-2.5 py-1 rounded-lg border border-rose-500/30 hover:bg-rose-500/20 text-rose-300 font-medium transition cursor-pointer"
                         >
                           Delete
                         </button>
@@ -262,9 +266,9 @@ export function AdminMoviesPage() {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-neutral-500 hover:text-white"
+                className="text-neutral-500 hover:text-white cursor-pointer"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 
