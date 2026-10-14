@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Clock } from 'lucide-react';
 
 interface HoldTimerBannerProps {
   expiresAt: string;
@@ -73,7 +74,7 @@ export const HoldTimerBanner: React.FC<HoldTimerBannerProps> = ({
                 : 'border-amber-500/50 bg-amber-500/20 text-amber-300'
             }`}
           >
-            ⏱️
+            <Clock className="h-5 w-5" />
           </div>
 
           <div>

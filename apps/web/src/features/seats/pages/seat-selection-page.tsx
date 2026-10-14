@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, RotateCw, X } from 'lucide-react';
 import { fetchSeatMap, createHold, releaseHold } from '../seat.api.js';
 import { SeatGrid } from '../components/seat-grid.js';
 import { HoldTimerBanner } from '../components/hold-timer-banner.js';
@@ -171,9 +172,10 @@ export function SeatSelectionPage() {
         <div>
           <Link
             to={`/movies/${seatMap.movieId}`}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-400 hover:text-amber-400 transition mb-1"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-400 hover:text-amber-400 transition mb-1 group"
           >
-            <span>&larr;</span> Back to Movie Showtimes
+            <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+            <span>Back to Movie Showtimes</span>
           </Link>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             {seatMap.movieTitle}
@@ -199,10 +201,10 @@ export function SeatSelectionPage() {
           <button
             type="button"
             onClick={() => refetch()}
-            className="p-2 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white transition"
+            className="p-2.5 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white transition cursor-pointer"
             title="Refresh seat availability"
           >
-            🔄
+            <RotateCw className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -214,9 +216,9 @@ export function SeatSelectionPage() {
           <button
             type="button"
             onClick={() => setErrorMessage(null)}
-            className="text-neutral-400 hover:text-white font-bold ml-2"
+            className="text-neutral-400 hover:text-white font-bold ml-2 cursor-pointer"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
@@ -227,9 +229,9 @@ export function SeatSelectionPage() {
           <button
             type="button"
             onClick={() => setInfoMessage(null)}
-            className="text-neutral-400 hover:text-white font-bold ml-2"
+            className="text-neutral-400 hover:text-white font-bold ml-2 cursor-pointer"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}

@@ -1,6 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  Calendar,
+  Clock,
+  Tv,
+  AlertTriangle,
+  Hourglass,
+  Info,
+  CreditCard,
+  XCircle,
+  ArrowLeft,
+} from 'lucide-react';
 import { fetchHoldDetail, processPayment, releaseHold } from '../booking.api.js';
 import { HoldTimerBanner } from '../../seats/components/hold-timer-banner.js';
 import { formatPaiseToInr, formatIstDate, formatIstTime } from '../../../lib/formatters.js';
@@ -110,7 +121,9 @@ export function CheckoutPage() {
   if (fetchError || !hold) {
     return (
       <div className="max-w-lg mx-auto py-16 text-center space-y-4">
-        <div className="text-4xl">⚠️</div>
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mx-auto">
+          <AlertTriangle className="h-6 w-6" />
+        </div>
         <h2 className="text-xl font-bold text-white">Hold Reservation Not Found</h2>
         <p className="text-sm text-neutral-400">
           This seat reservation may have already expired or does not belong to your account.
@@ -134,9 +147,10 @@ export function CheckoutPage() {
       <div>
         <Link
           to={`/shows/${hold.showId}`}
-          className="text-xs text-neutral-400 hover:text-white transition flex items-center gap-1.5 mb-2"
+          className="text-xs text-neutral-400 hover:text-white transition flex items-center gap-1.5 mb-2 group"
         >
-          &larr; Back to Seat Selection
+          <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+          <span>Back to Seat Selection</span>
         </Link>
         <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
           Checkout & Mock Payment
@@ -157,8 +171,8 @@ export function CheckoutPage() {
           isReleasing={releaseMutation.isPending}
         />
       ) : (
-        <div className="rounded-2xl border border-rose-500/40 bg-rose-950/20 p-5 text-center space-y-3">
-          <div className="text-2xl">⏳</div>
+        <div className="rounded-2xl border border-rose-500/40 bg-rose-950/20 p-6 text-center space-y-3">
+          <Hourglass className="h-8 w-8 text-rose-400 mx-auto" />
           <h3 className="text-base font-bold text-rose-300">Reservation Expired</h3>
           <p className="text-xs text-rose-200/80 max-w-md mx-auto">
             Your 5-minute seat hold has expired. To prevent double-booking, the auditorium seats
@@ -174,16 +188,25 @@ export function CheckoutPage() {
       )}
 
       {/* Order Summary Card */}
-      <div className="rounded-3xl border border-neutral-800 bg-neutral-900/60 p-6 sm:p-8 backdrop-blur space-y-6">
+      <div className="rounded-3xl border border-neutral-800 bg-neutral-900/60 p-6 sm:p-8 backdrop-blur space-y-6 shadow-xl">
         <div className="border-b border-neutral-800/80 pb-6">
           <span className="text-[10px] font-black uppercase tracking-widest text-amber-400">
             Screening Details
           </span>
           <h2 className="text-xl sm:text-2xl font-black text-white mt-1">{hold.movieTitle}</h2>
           <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-300 mt-2 font-medium">
-            <span>📅 {formatIstDate(hold.startsAt)}</span>
-            <span>🕒 {formatIstTime(hold.startsAt)} IST</span>
-            <span>📽️ Screen 1 (80 Seats)</span>
+            <span className="flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5 text-neutral-400" />
+              {formatIstDate(hold.startsAt)}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-neutral-400" />
+              {formatIstTime(hold.startsAt)} IST
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Tv className="h-3.5 w-3.5 text-neutral-400" />
+              Screen 1 (80 Seats)
+            </span>
           </div>
         </div>
 
@@ -227,7 +250,7 @@ export function CheckoutPage() {
         {/* Payment Error / Decline Notice */}
         {paymentError && (
           <div className="rounded-xl border border-rose-500/30 bg-rose-950/30 p-4 text-xs text-rose-300 flex items-start gap-2.5">
-            <span className="text-base">⚠️</span>
+            <AlertTriangle className="h-4 w-4 text-rose-400 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <span className="font-bold">Payment Status:</span> {paymentError}
             </div>
@@ -237,8 +260,9 @@ export function CheckoutPage() {
         {/* Simulated Payment Actions */}
         {!isHoldExpired ? (
           <div className="space-y-3 pt-2">
-            <div className="text-xs text-neutral-400 text-center font-medium">
-              💡 Mock simulation sandbox: no actual financial transaction occurs.
+            <div className="text-xs text-neutral-400 text-center font-medium flex items-center justify-center gap-1.5">
+              <Info className="h-3.5 w-3.5 text-neutral-500" />
+              <span>Mock simulation sandbox: no actual financial transaction occurs.</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -246,13 +270,14 @@ export function CheckoutPage() {
                 type="button"
                 onClick={() => paymentMutation.mutate('success')}
                 disabled={paymentMutation.isPending || releaseMutation.isPending}
-                className="w-full py-3.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-extrabold text-sm transition shadow-lg shadow-amber-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-neutral-950 font-extrabold text-sm transition shadow-lg shadow-amber-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {paymentMutation.isPending ? (
                   'Processing Simulation...'
                 ) : (
                   <>
-                    <span>💳</span> Payment success
+                    <CreditCard className="h-4 w-4" />
+                    <span>Payment Success</span>
                   </>
                 )}
               </button>
@@ -261,9 +286,10 @@ export function CheckoutPage() {
                 type="button"
                 onClick={() => paymentMutation.mutate('failure')}
                 disabled={paymentMutation.isPending || releaseMutation.isPending}
-                className="w-full py-3.5 px-4 rounded-xl border border-neutral-700 hover:border-neutral-600 bg-neutral-800/80 hover:bg-neutral-800 text-neutral-200 font-bold text-sm transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-4 rounded-xl border border-neutral-700 hover:border-neutral-600 bg-neutral-800/80 hover:bg-neutral-800 text-neutral-200 font-bold text-sm transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>✕</span> Payment failure
+                <XCircle className="h-4 w-4 text-neutral-400" />
+                <span>Payment Failure</span>
               </button>
             </div>
 
@@ -272,7 +298,7 @@ export function CheckoutPage() {
                 type="button"
                 onClick={() => releaseMutation.mutate()}
                 disabled={paymentMutation.isPending || releaseMutation.isPending}
-                className="text-xs text-neutral-400 hover:text-neutral-200 transition underline underline-offset-4 disabled:opacity-50"
+                className="text-xs text-neutral-400 hover:text-neutral-200 transition underline underline-offset-4 disabled:opacity-50 cursor-pointer"
               >
                 {releaseMutation.isPending
                   ? 'Releasing seats...'
