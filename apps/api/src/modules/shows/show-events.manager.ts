@@ -82,7 +82,7 @@ export class ShowEventsManager {
       if (seatMap) {
         res.write(`event: seat_map_update\ndata: ${JSON.stringify(seatMap)}\n\n`);
       }
-    } catch (err) {
+    } catch {
       // Non-fatal if initial payload fails; client can still receive broadcasts
     }
 

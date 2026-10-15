@@ -7,10 +7,7 @@ export interface UseSeatStreamOptions {
   onSeatMapUpdate?: (seatMap: SeatMapResponse) => void;
 }
 
-export function useSeatStream(
-  showId: string | undefined,
-  options?: UseSeatStreamOptions,
-) {
+export function useSeatStream(showId: string | undefined, options?: UseSeatStreamOptions) {
   const [status, setStatus] = useState<SSEConnectionStatus>('connecting');
   const onUpdateRef = useRef(options?.onSeatMapUpdate);
   onUpdateRef.current = options?.onSeatMapUpdate;

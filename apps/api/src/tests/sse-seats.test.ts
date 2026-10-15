@@ -68,28 +68,29 @@ describe('Server-Sent Events (SSE) Real-Time Seat Synchronization', () => {
       sql`SELECT id FROM shows WHERE starts_at >= ${futureDate}::date AND starts_at < (${futureDate}::date + interval '1 day')`,
     );
     for (const row of leftoverShowsRes.rows as any[]) {
-      await db.execute(sql`UPDATE show_seats SET hold_id = NULL, held_until = NULL WHERE show_id = ${row.id}`);
+      await db.execute(
+        sql`UPDATE show_seats SET hold_id = NULL, held_until = NULL WHERE show_id = ${row.id}`,
+      );
       await db.execute(sql`DELETE FROM hold_seats WHERE show_id = ${row.id}`);
       await db.execute(sql`DELETE FROM holds WHERE show_id = ${row.id}`);
       await db.execute(sql`DELETE FROM show_seats WHERE show_id = ${row.id}`);
       await db.execute(sql`DELETE FROM shows WHERE id = ${row.id}`);
     }
 
-    const showRes = await request(app)
-      .post('/api/v1/admin/shows')
-      .set('Cookie', adminCookie)
-      .send({
-        movieId: testMovieId,
-        localDate: futureDate,
-        localTime: '18:00',
-        pricePaise: 25000,
-      });
+    const showRes = await request(app).post('/api/v1/admin/shows').set('Cookie', adminCookie).send({
+      movieId: testMovieId,
+      localDate: futureDate,
+      localTime: '18:00',
+      pricePaise: 25000,
+    });
     testShowId = showRes.body.data.id;
   });
 
   afterAll(async () => {
     if (testShowId) {
-      await db.execute(sql`UPDATE show_seats SET hold_id = NULL, held_until = NULL WHERE show_id = ${testShowId}`);
+      await db.execute(
+        sql`UPDATE show_seats SET hold_id = NULL, held_until = NULL WHERE show_id = ${testShowId}`,
+      );
       await db.execute(sql`DELETE FROM hold_seats WHERE show_id = ${testShowId}`);
       await db.execute(sql`DELETE FROM holds WHERE show_id = ${testShowId}`);
       await db.execute(sql`DELETE FROM show_seats WHERE show_id = ${testShowId}`);
