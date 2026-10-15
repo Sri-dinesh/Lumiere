@@ -10,6 +10,7 @@ export const showRouter = Router();
 // Public / customer show routes
 showRouter.get('/:id', showController.getShow);
 showRouter.get('/:id/seats', showController.getShowSeats);
+showRouter.get('/:id/events', showController.subscribeShowEvents);
 
 // Customer hold reservation route (requires authentication & valid seat selection)
 showRouter.post(

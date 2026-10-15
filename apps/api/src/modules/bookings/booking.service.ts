@@ -1,4 +1,5 @@
 import { bookingRepository, BookingRepository } from './booking.repository.js';
+import { showEventsManager } from '../shows/show-events.manager.js';
 import { AppError } from '../../lib/errors.js';
 
 export class BookingService {
@@ -11,7 +12,13 @@ export class BookingService {
     paymentAction?: 'CONFIRM' | 'DECLINE';
     paymentReference?: string;
   }) {
-    return this.bookingRepo.processPayment(params);
+    const result = await this.bookingRepo.processPayment(params);
+
+    if (result && 'showId' in result && result.showId) {
+      showEventsManager.broadcastSeatMapUpdate(result.showId).catch(() => {});
+    }
+
+    return result;
   }
 
   async listUserBookings(userId: string) {
@@ -32,7 +39,13 @@ export class BookingService {
   }
 
   async cancelBooking(bookingId: string, userId: string, isAdmin: boolean) {
-    return this.bookingRepo.cancelBooking(bookingId, userId, isAdmin);
+    const result = await this.bookingRepo.cancelBooking(bookingId, userId, isAdmin);
+
+    if (result && result.showId) {
+      showEventsManager.broadcastSeatMapUpdate(result.showId).catch(() => {});
+    }
+
+    return result;
   }
 }
 

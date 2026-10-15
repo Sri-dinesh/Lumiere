@@ -142,7 +142,7 @@ describe('Movies & Shows Catalog & Admin Scheduling (Phase P4)', () => {
     // Attempt to schedule another show overlapping the 14:00-17:00 slot (at 15:00)
     const futureDate = DateTime.now()
       .setZone('Asia/Kolkata')
-      .plus({ days: 3 })
+      .plus({ days: 7 })
       .toFormat('yyyy-MM-dd');
 
     const overlapRes = await request(app)

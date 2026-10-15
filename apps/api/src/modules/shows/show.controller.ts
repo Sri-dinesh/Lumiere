@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { showService, ShowService } from './show.service.js';
+import { showEventsManager } from './show-events.manager.js';
 import type { CreateShowInput, ListShowsQuery } from './show.schema.js';
 
 export class ShowController {
@@ -55,6 +56,11 @@ export class ShowController {
       success: true,
       data: report,
     });
+  };
+
+  subscribeShowEvents = async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    await showEventsManager.subscribe(id, req, res);
   };
 }
 

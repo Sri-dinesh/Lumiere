@@ -1,20 +1,29 @@
 import { holdRepository, HoldRepository } from './hold.repository.js';
+import { showEventsManager } from '../shows/show-events.manager.js';
 import { AppError } from '../../lib/errors.js';
 
 export class HoldService {
   constructor(private readonly holdRepo: HoldRepository = holdRepository) {}
 
   async createHold(userId: string, showId: string, seatCodes: string[], requestKey?: string) {
-    return this.holdRepo.createHold({
+    const result = await this.holdRepo.createHold({
       userId,
       showId,
       seatCodes,
       requestKey,
     });
+
+    // Notify connected SSE viewers immediately
+    showEventsManager.broadcastSeatMapUpdate(showId).catch(() => {});
+
+    return result;
   }
 
   async releaseHold(holdId: string, userId: string, isAdmin: boolean) {
-    await this.holdRepo.releaseHold(holdId, userId, isAdmin);
+    const { showId } = await this.holdRepo.releaseHold(holdId, userId, isAdmin);
+
+    // Notify connected SSE viewers immediately
+    showEventsManager.broadcastSeatMapUpdate(showId).catch(() => {});
   }
 
   async getHoldById(holdId: string, userId: string, isAdmin: boolean) {

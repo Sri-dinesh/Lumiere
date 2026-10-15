@@ -87,12 +87,12 @@ describe('Payment, Bookings Lifecycle & Cancellation Window (Phase P6)', () => {
     expect(futureShowRes.status).toBe(201);
     futureShowId = futureShowRes.body.data.id;
 
-    // 4. Create a near show (<2 hours from now - directly via DB for cancellation window testing)
-    const startsIn30Mins = new Date(Date.now() + 30 * 60 * 1000);
-    const endsIn150Mins = new Date(Date.now() + 150 * 60 * 1000);
+    // 4. Create a near show (<2 hours from now / past - directly via DB for cancellation window testing)
+    const starts5DaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
+    const ends5DaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000 + 120 * 60 * 1000);
     const nearShowRes = await db.execute(sql`
       INSERT INTO shows (movie_id, screen_id, starts_at, ends_at, duration_minutes_snapshot, price_paise)
-      VALUES (${testMovieId}, 1, ${startsIn30Mins}, ${endsIn150Mins}, 120, 25000)
+      VALUES (${testMovieId}, 1, ${starts5DaysAgo}, ${ends5DaysAgo}, 120, 25000)
       RETURNING id
     `);
     nearShowId = (nearShowRes.rows[0] as any).id;

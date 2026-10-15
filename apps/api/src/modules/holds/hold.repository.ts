@@ -162,7 +162,7 @@ export class HoldRepository {
     });
   }
 
-  async releaseHold(holdId: string, userId: string, isAdmin: boolean): Promise<void> {
+  async releaseHold(holdId: string, userId: string, isAdmin: boolean): Promise<{ showId: string }> {
     return db.transaction(async (tx) => {
       const holdRes = await tx.execute(sql`
         SELECT id, show_id as "showId", user_id as "userId", status
@@ -196,6 +196,8 @@ export class HoldRepository {
             AND hold_id = ${holdId}
         `);
       }
+
+      return { showId: hold.showId };
     });
   }
 

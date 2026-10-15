@@ -6,6 +6,8 @@ import { fetchSeatMap, createHold, releaseHold } from '../seat.api.js';
 import { SeatGrid } from '../components/seat-grid.js';
 import { HoldTimerBanner } from '../components/hold-timer-banner.js';
 import { useCurrentUser } from '../../auth/use-current-user.js';
+import { useSeatStream } from '../use-seat-stream.js';
+import type { SeatMapResponse } from '../seat.types.js';
 import { ApiError } from '../../../lib/api-client.js';
 
 function formatPaiseToInr(paise: number): string {
@@ -35,7 +37,37 @@ export function SeatSelectionPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
-  // Poll seat map every 5 seconds for real-time concurrency status
+  // Handle instant SSE seat updates and clear seats claimed by others
+  const handleRealTimeSeatMapUpdate = useCallback(
+    (newSeatMap: SeatMapResponse) => {
+      queryClient.setQueryData(['show-seats', showId], newSeatMap);
+
+      setSelectedSeatCodes((prevSelected) => {
+        const conflicts = prevSelected.filter((code) => {
+          const seat = newSeatMap.seats.find((s) => s.seatCode === code);
+          return seat && seat.status !== 'AVAILABLE' && !seat.heldByCurrentUser;
+        });
+
+        if (conflicts.length > 0) {
+          setErrorMessage(
+            `Seat${conflicts.length > 1 ? 's' : ''} ${conflicts.join(', ')} ${
+              conflicts.length > 1 ? 'were' : 'was'
+            } just reserved by another guest.`,
+          );
+          return prevSelected.filter((code) => !conflicts.includes(code));
+        }
+
+        return prevSelected;
+      });
+    },
+    [queryClient, showId],
+  );
+
+  const { isLive } = useSeatStream(showId, {
+    onSeatMapUpdate: handleRealTimeSeatMapUpdate,
+  });
+
+  // Query seat map (SSE provides instant updates; polling acts as automatic fallback)
   const {
     data: seatMap,
     isLoading,
@@ -45,7 +77,7 @@ export function SeatSelectionPage() {
     queryKey: ['show-seats', showId],
     queryFn: () => fetchSeatMap(showId!),
     enabled: !!showId,
-    refetchInterval: 3000,
+    refetchInterval: isLive ? false : 4000,
   });
 
   const activeHold = seatMap?.currentUserActiveHold;
@@ -192,17 +224,30 @@ export function SeatSelectionPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="text-right">
-            <div className="text-xs font-semibold text-emerald-400">
+          <div className="text-right flex flex-col items-end gap-1">
+            <div className="text-xs font-bold text-emerald-400">
               {seatMap.availableCount} of {seatMap.totalSeats} seats available
             </div>
-            <div className="text-[11px] text-neutral-500">Auto-syncs live updates every 5s</div>
+            {isLive ? (
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[10px] font-semibold text-emerald-400 tracking-wide">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span>Live Sync Active</span>
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-neutral-800/80 border border-neutral-700/60 text-[10px] text-neutral-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+                <span>Polling (fallback)</span>
+              </div>
+            )}
           </div>
           <button
             type="button"
             onClick={() => refetch()}
             className="p-2.5 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white transition cursor-pointer"
-            title="Refresh seat availability"
+            title="Refresh seat availability manually"
           >
             <RotateCw className="h-4 w-4" />
           </button>

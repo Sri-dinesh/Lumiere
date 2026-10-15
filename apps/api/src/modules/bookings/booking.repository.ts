@@ -421,6 +421,7 @@ export class BookingRepository {
 
       return {
         bookingId,
+        showId: booking.showId,
         status: 'CANCELLED',
         cancelledAt: new Date().toISOString(),
       };
