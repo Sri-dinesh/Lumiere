@@ -1,4 +1,4 @@
-import { pgTable, uuid, integer, timestamp, unique, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, integer, timestamp, unique, index, boolean } from 'drizzle-orm/pg-core';
 import { users } from './users.js';
 import { shows } from './shows.js';
 import { holdStatusEnum } from './enums.js';
@@ -18,6 +18,8 @@ export const holds = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
     requestKey: uuid('request_key').notNull(),
+    isExtended: boolean('is_extended').notNull().default(false),
+    extendedAt: timestamp('extended_at', { withTimezone: true, mode: 'date' }),
   },
   (table) => [
     unique('holds_id_show_uk').on(table.id, table.showId),

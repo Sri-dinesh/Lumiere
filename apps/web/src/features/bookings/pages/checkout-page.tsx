@@ -12,7 +12,13 @@ import {
   XCircle,
   ArrowLeft,
 } from 'lucide-react';
-import { fetchHoldDetail, processPayment, releaseHold } from '../booking.api.js';
+import {
+  fetchHoldDetail,
+  processPayment,
+  releaseHold,
+  extendHold,
+  type HoldDetailResponse,
+} from '../booking.api.js';
 import { HoldTimerBanner } from '../../seats/components/hold-timer-banner.js';
 import { formatPaiseToInr, formatIstDate, formatIstTime } from '../../../lib/formatters.js';
 import { ApiError } from '../../../lib/api-client.js';
@@ -44,13 +50,39 @@ export function CheckoutPage() {
     }
   }, [hold]);
 
-  // 2. Mock payment mutation
+  // 2. Extend hold mutation
+  const extendMutation = useMutation({
+    mutationFn: async () => {
+      return extendHold(holdId!);
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData<HoldDetailResponse>(['hold-detail', holdId], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          expiresAt: data.expiresAt,
+          secondsRemaining: data.secondsRemaining,
+          isExtended: data.isExtended,
+          canExtend: false,
+        };
+      });
+      queryClient.invalidateQueries({ queryKey: ['show-seats'] });
+    },
+    onError: (err) => {
+      if (err instanceof ApiError) {
+        setPaymentError(err.message);
+      } else {
+        setPaymentError('Failed to extend hold reservation.');
+      }
+    },
+  });
+
+  // 3. Mock payment mutation
   const paymentMutation = useMutation({
     mutationFn: async (outcome: 'success' | 'failure') => {
       return processPayment(holdId!, outcome);
     },
     onSuccess: (data) => {
-      // Invalidate relevant queries across seat maps and bookings
       queryClient.invalidateQueries({ queryKey: ['show-seats'] });
       queryClient.invalidateQueries({ queryKey: ['my-bookings'] });
 
@@ -78,7 +110,7 @@ export function CheckoutPage() {
     },
   });
 
-  // 3. Release hold mutation
+  // 4. Release hold mutation
   const releaseMutation = useMutation({
     mutationFn: async () => {
       return releaseHold(holdId!);
@@ -103,7 +135,7 @@ export function CheckoutPage() {
   const handleTimerExpired = useCallback(() => {
     setIsHoldExpired(true);
     setPaymentError(
-      'Your 5-minute reservation window has ended. Seats have been returned to available inventory.',
+      'Your reservation window has ended. Seats have been returned to available inventory.',
     );
     queryClient.invalidateQueries({ queryKey: ['show-seats'] });
   }, [queryClient]);
@@ -169,14 +201,18 @@ export function CheckoutPage() {
           onExpire={handleTimerExpired}
           onRelease={() => releaseMutation.mutate()}
           isReleasing={releaseMutation.isPending}
+          canExtend={hold.canExtend}
+          isExtended={hold.isExtended}
+          isExtending={extendMutation.isPending}
+          onExtend={() => extendMutation.mutate()}
         />
       ) : (
         <div className="rounded-2xl border border-rose-500/40 bg-rose-950/20 p-6 text-center space-y-3">
           <Hourglass className="h-8 w-8 text-rose-400 mx-auto" />
           <h3 className="text-base font-bold text-rose-300">Reservation Expired</h3>
           <p className="text-xs text-rose-200/80 max-w-md mx-auto">
-            Your 5-minute seat hold has expired. To prevent double-booking, the auditorium seats
-            have been returned to the public pool.
+            Your seat hold has expired. To prevent double-booking, the auditorium seats have been
+            returned to the public pool.
           </p>
           <Link
             to={`/shows/${hold.showId}`}
@@ -269,7 +305,9 @@ export function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => paymentMutation.mutate('success')}
-                disabled={paymentMutation.isPending || releaseMutation.isPending}
+                disabled={
+                  paymentMutation.isPending || releaseMutation.isPending || extendMutation.isPending
+                }
                 className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-neutral-950 font-extrabold text-sm transition shadow-lg shadow-amber-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {paymentMutation.isPending ? (
@@ -285,7 +323,9 @@ export function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => paymentMutation.mutate('failure')}
-                disabled={paymentMutation.isPending || releaseMutation.isPending}
+                disabled={
+                  paymentMutation.isPending || releaseMutation.isPending || extendMutation.isPending
+                }
                 className="w-full py-3.5 px-4 rounded-xl border border-neutral-700 hover:border-neutral-600 bg-neutral-800/80 hover:bg-neutral-800 text-neutral-200 font-bold text-sm transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <XCircle className="h-4 w-4 text-neutral-400" />
@@ -297,7 +337,9 @@ export function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => releaseMutation.mutate()}
-                disabled={paymentMutation.isPending || releaseMutation.isPending}
+                disabled={
+                  paymentMutation.isPending || releaseMutation.isPending || extendMutation.isPending
+                }
                 className="text-xs text-neutral-400 hover:text-neutral-200 transition underline underline-offset-4 disabled:opacity-50 cursor-pointer"
               >
                 {releaseMutation.isPending

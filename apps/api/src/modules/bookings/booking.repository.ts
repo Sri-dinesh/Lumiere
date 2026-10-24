@@ -37,7 +37,7 @@ export class BookingRepository {
   async processPayment(params: ProcessPaymentParams) {
     const { holdId, userId, outcome, paymentAction } = params;
 
-    return db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       // 1. Initial lookup to get showId
       const initialHoldRes = await tx.execute(sql`
         SELECT id, user_id as "userId", show_id as "showId", status
@@ -139,10 +139,7 @@ export class BookingRepository {
           SET hold_id = NULL, held_until = NULL 
           WHERE show_id = ${hold.showId} AND hold_id = ${holdId}
         `);
-        throw AppError.conflict(
-          'HOLD_EXPIRED',
-          'Your seat hold has expired. Please select seats again.',
-        );
+        return { isExpired: true };
       }
 
       // 5. Handle simulated payment failure/decline
@@ -251,6 +248,15 @@ export class BookingRepository {
         isIdempotentReplay: false,
       };
     });
+
+    if ('isExpired' in result && result.isExpired) {
+      throw AppError.conflict(
+        'HOLD_EXPIRED',
+        'Your seat hold has expired. Please select seats again.',
+      );
+    }
+
+    return result;
   }
 
   async listUserBookings(userId: string): Promise<BookingDetail[]> {

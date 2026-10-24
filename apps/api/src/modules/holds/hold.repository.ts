@@ -58,6 +58,16 @@ export class HoldRepository {
         );
       }
 
+      // Eagerly expire any stale active holds for this user on this show
+      await tx.execute(sql`
+        UPDATE holds
+        SET status = 'EXPIRED'
+        WHERE show_id = ${showId}
+          AND user_id = ${userId}
+          AND status = 'ACTIVE'
+          AND expires_at <= clock_timestamp()
+      `);
+
       // 2. Check if user already has an active hold on this show
       const existingUserHoldRes = await tx.execute(sql`
         SELECT id
@@ -201,6 +211,124 @@ export class HoldRepository {
     });
   }
 
+  async extendHold(
+    holdId: string,
+    userId: string,
+    isAdmin: boolean,
+  ): Promise<{
+    holdId: string;
+    showId: string;
+    expiresAt: string;
+    secondsRemaining: number;
+    isExtended: boolean;
+  }> {
+    const result = await db.transaction(async (tx) => {
+      const initialHoldRes = await tx.execute(sql`
+        SELECT show_id as "showId", user_id as "userId"
+        FROM holds
+        WHERE id = ${holdId}
+        LIMIT 1
+      `);
+
+      const initialHold = initialHoldRes.rows[0] as any;
+      if (!initialHold) {
+        throw AppError.notFound('Hold reservation not found');
+      }
+
+      if (!isAdmin && initialHold.userId !== userId) {
+        throw AppError.forbidden('You are not authorized to extend this hold reservation.');
+      }
+
+      const showId = initialHold.showId;
+
+      // Maintain strict lock hierarchy: shows first, then holds
+      await tx.execute(sql`
+        SELECT id FROM shows WHERE id = ${showId} FOR UPDATE
+      `);
+
+      const holdRes = await tx.execute(sql`
+        SELECT 
+          id, 
+          status, 
+          is_extended as "isExtended", 
+          expires_at as "expiresAt", 
+          (expires_at <= clock_timestamp()) as "isExpired" 
+        FROM holds 
+        WHERE id = ${holdId} 
+        FOR UPDATE
+      `);
+
+      const hold = holdRes.rows[0] as any;
+      if (!hold) {
+        throw AppError.notFound('Hold reservation not found');
+      }
+
+      if (hold.status !== 'ACTIVE') {
+        throw AppError.conflict('HOLD_NOT_ACTIVE', 'Hold reservation is no longer active.');
+      }
+
+      if (hold.isExpired) {
+        await tx.execute(sql`UPDATE holds SET status = 'EXPIRED' WHERE id = ${holdId}`);
+        await tx.execute(sql`
+          UPDATE show_seats 
+          SET hold_id = NULL, held_until = NULL 
+          WHERE show_id = ${showId} AND hold_id = ${holdId}
+        `);
+        return { isExpired: true, showId };
+      }
+
+      if (hold.isExtended) {
+        throw AppError.conflict(
+          'HOLD_ALREADY_EXTENDED',
+          'Hold has already been extended. Only one 2-minute extension is permitted per hold.',
+        );
+      }
+
+      const updateRes = await tx.execute(sql`
+        UPDATE holds 
+        SET 
+          expires_at = expires_at + interval '120 seconds', 
+          is_extended = true, 
+          extended_at = clock_timestamp() 
+        WHERE id = ${holdId} 
+        RETURNING 
+          expires_at as "expiresAt", 
+          GREATEST(0, EXTRACT(EPOCH FROM (expires_at - clock_timestamp()))::int) as "secondsRemaining"
+      `);
+
+      const updated = updateRes.rows[0] as any;
+
+      await tx.execute(sql`
+        UPDATE show_seats 
+        SET held_until = ${updated.expiresAt} 
+        WHERE show_id = ${showId} AND hold_id = ${holdId}
+      `);
+
+      return {
+        holdId,
+        showId,
+        expiresAt: new Date(updated.expiresAt).toISOString(),
+        secondsRemaining: Number(updated.secondsRemaining),
+        isExtended: true,
+      };
+    });
+
+    if ('isExpired' in result && result.isExpired) {
+      throw AppError.conflict(
+        'HOLD_EXPIRED',
+        'Your seat hold has expired. Please select seats again.',
+      );
+    }
+
+    return result as {
+      holdId: string;
+      showId: string;
+      expiresAt: string;
+      secondsRemaining: number;
+      isExtended: boolean;
+    };
+  }
+
   async getHoldById(holdId: string) {
     const result = await this.client.execute(sql`
       SELECT 
@@ -210,6 +338,7 @@ export class HoldRepository {
         h.status,
         h.expires_at as "expiresAt",
         GREATEST(0, EXTRACT(EPOCH FROM (h.expires_at - clock_timestamp()))::int) as "secondsRemaining",
+        h.is_extended as "isExtended",
         m.title as "movieTitle",
         s.starts_at as "startsAt",
         s.price_paise as "pricePaise",
@@ -219,12 +348,16 @@ export class HoldRepository {
       JOIN movies m ON s.movie_id = m.id
       JOIN hold_seats hs ON h.id = hs.hold_id
       WHERE h.id = ${holdId}
-      GROUP BY h.id, m.title, s.starts_at, s.price_paise
+      GROUP BY h.id, m.title, s.starts_at, s.price_paise, h.is_extended
       LIMIT 1
     `);
 
     const row = result.rows[0] as any;
     if (!row) return null;
+
+    const secondsRemaining = Number(row.secondsRemaining);
+    const isExtended = Boolean(row.isExtended);
+    const canExtend = Boolean(row.status === 'ACTIVE' && !isExtended && secondsRemaining > 0);
 
     return {
       id: row.id,
@@ -232,7 +365,9 @@ export class HoldRepository {
       showId: row.showId,
       status: row.status,
       expiresAt: new Date(row.expiresAt).toISOString(),
-      secondsRemaining: Number(row.secondsRemaining),
+      secondsRemaining,
+      isExtended,
+      canExtend,
       movieTitle: row.movieTitle,
       startsAt: new Date(row.startsAt).toISOString(),
       pricePaise: Number(row.pricePaise),
