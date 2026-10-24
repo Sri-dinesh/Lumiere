@@ -8,6 +8,10 @@ interface HoldTimerBannerProps {
   onExpire: () => void;
   onRelease: () => void;
   isReleasing: boolean;
+  canExtend?: boolean;
+  isExtended?: boolean;
+  isExtending?: boolean;
+  onExtend?: () => void;
 }
 
 export const HoldTimerBanner: React.FC<HoldTimerBannerProps> = ({
@@ -17,6 +21,10 @@ export const HoldTimerBanner: React.FC<HoldTimerBannerProps> = ({
   onExpire,
   onRelease,
   isReleasing,
+  canExtend,
+  isExtended,
+  isExtending,
+  onExtend,
 }) => {
   const [secondsLeft, setSecondsLeft] = useState<number>(() => {
     const targetMs = new Date(expiresAt).getTime();
@@ -26,7 +34,7 @@ export const HoldTimerBanner: React.FC<HoldTimerBannerProps> = ({
   });
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const updateTime = () => {
       const targetMs = new Date(expiresAt).getTime();
       const nowMs = Date.now();
       const diff = Math.max(0, Math.floor((targetMs - nowMs) / 1000));
@@ -34,10 +42,12 @@ export const HoldTimerBanner: React.FC<HoldTimerBannerProps> = ({
       setSecondsLeft(diff);
 
       if (diff <= 0) {
-        clearInterval(interval);
         onExpire();
       }
-    }, 1000);
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
 
     return () => clearInterval(interval);
   }, [expiresAt, onExpire]);
@@ -47,7 +57,8 @@ export const HoldTimerBanner: React.FC<HoldTimerBannerProps> = ({
   const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
   const isUrgent = secondsLeft < 60;
-  const progressPercent = Math.min(100, Math.max(0, (secondsLeft / 300) * 100));
+  const totalWindow = isExtended ? 420 : 300;
+  const progressPercent = Math.min(100, Math.max(0, (secondsLeft / totalWindow) * 100));
 
   return (
     <div
@@ -83,6 +94,11 @@ export const HoldTimerBanner: React.FC<HoldTimerBannerProps> = ({
               <span className="rounded bg-amber-500/20 px-2 py-0.5 text-xs font-bold text-amber-300 border border-amber-500/30">
                 {seatCodes.join(', ')}
               </span>
+              {isExtended && (
+                <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-xs font-bold text-emerald-300 border border-emerald-500/30">
+                  +2m Applied
+                </span>
+              )}
             </div>
             <p className="text-xs text-neutral-300 mt-0.5">
               Complete your payment before time expires to secure your reservation.
@@ -104,11 +120,22 @@ export const HoldTimerBanner: React.FC<HoldTimerBannerProps> = ({
             </div>
           </div>
 
+          {canExtend && onExtend && (
+            <button
+              type="button"
+              onClick={onExtend}
+              disabled={isExtending}
+              className="rounded-xl border border-amber-500/50 hover:border-amber-400 bg-amber-500/10 hover:bg-amber-500/20 px-3.5 py-2 text-xs font-semibold text-amber-300 hover:text-amber-200 transition disabled:opacity-50 cursor-pointer"
+            >
+              {isExtending ? 'Extending...' : 'Extend (+2m)'}
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onRelease}
             disabled={isReleasing}
-            className="rounded-xl border border-neutral-700 hover:border-neutral-500 bg-neutral-900/80 px-3.5 py-2 text-xs font-semibold text-neutral-300 hover:text-white transition"
+            className="rounded-xl border border-neutral-700 hover:border-neutral-500 bg-neutral-900/80 px-3.5 py-2 text-xs font-semibold text-neutral-300 hover:text-white transition cursor-pointer"
           >
             {isReleasing ? 'Releasing...' : 'Change Seats'}
           </button>

@@ -12,10 +12,30 @@ export interface HoldDetailResponse {
   startsAt: string;
   pricePaise: number;
   seatCodes: string[];
+  isExtended: boolean;
+  canExtend?: boolean;
 }
 
 export async function fetchHoldDetail(holdId: string): Promise<HoldDetailResponse> {
   return apiClient<HoldDetailResponse>(`/api/v1/holds/${holdId}`);
+}
+
+export async function extendHold(holdId: string): Promise<{
+  holdId: string;
+  showId: string;
+  expiresAt: string;
+  secondsRemaining: number;
+  isExtended: boolean;
+}> {
+  return apiClient<{
+    holdId: string;
+    showId: string;
+    expiresAt: string;
+    secondsRemaining: number;
+    isExtended: boolean;
+  }>(`/api/v1/holds/${holdId}/extend`, {
+    method: 'POST',
+  });
 }
 
 export async function processPayment(
