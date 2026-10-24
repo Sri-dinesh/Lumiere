@@ -9,6 +9,7 @@ export const holdRouter = Router();
 
 // Customer hold management routes
 holdRouter.get('/:id', requireAuth, holdController.getHold);
+holdRouter.post('/:id/extend', requireAuth, holdController.extendHold);
 holdRouter.delete('/:id', requireAuth, holdController.releaseHold);
 
 // Mock payment processing and booking creation

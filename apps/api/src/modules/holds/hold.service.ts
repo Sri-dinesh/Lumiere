@@ -26,6 +26,15 @@ export class HoldService {
     showEventsManager.broadcastSeatMapUpdate(showId).catch(() => {});
   }
 
+  async extendHold(holdId: string, userId: string, isAdmin: boolean) {
+    const result = await this.holdRepo.extendHold(holdId, userId, isAdmin);
+
+    // Notify connected SSE viewers immediately
+    showEventsManager.broadcastSeatMapUpdate(result.showId).catch(() => {});
+
+    return result;
+  }
+
   async getHoldById(holdId: string, userId: string, isAdmin: boolean) {
     const hold = await this.holdRepo.getHoldById(holdId);
     if (!hold) {

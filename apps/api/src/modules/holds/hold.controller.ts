@@ -27,6 +27,18 @@ export class HoldController {
     res.status(204).send();
   };
 
+  extendHold = async (req: Request, res: Response) => {
+    const holdId = req.params.id as string;
+    const userId = req.auth!.userId;
+    const isAdmin = req.auth!.role === 'ADMIN';
+
+    const result = await this.service.extendHold(holdId, userId, isAdmin);
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  };
+
   getHold = async (req: Request, res: Response) => {
     const holdId = req.params.id as string;
     const userId = req.auth!.userId;
